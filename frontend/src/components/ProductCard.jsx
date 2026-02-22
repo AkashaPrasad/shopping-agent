@@ -10,8 +10,10 @@ import { faBagShopping, faHeart as faHeartSolid, faXmark } from "@fortawesome/fr
 import { faHeart as faHeartRegular } from "@fortawesome/free-regular-svg-icons";
 import useCartStore from "../store/useCartStore";
 import useAuthStore from "../store/useAuthStore";
+import normalizeProduct from "../utils/normalizeProduct";
 
 export default function ProductCard({ product, compact = false }) {
+  const normalized = normalizeProduct(product);
   const { addToCart } = useCartStore();
   const { user } = useAuthStore();
   const navigate = useNavigate();
@@ -20,8 +22,8 @@ export default function ProductCard({ product, compact = false }) {
   const [sizeDialogOpen, setSizeDialogOpen] = useState(false);
   const [pendingSize, setPendingSize] = useState(null);
 
-  const hasSizes = product.sizes?.length > 0;
-  const hasShoeSizes = product.shoeSizes?.length > 0;
+  const hasSizes = normalized.sizes?.length > 0;
+  const hasShoeSizes = normalized.shoeSizes?.length > 0;
   const needsSizeSelection = hasSizes || hasShoeSizes;
 
   const handleAddToCart = (e) => {
@@ -41,7 +43,7 @@ export default function ProductCard({ product, compact = false }) {
     setPendingSize(null);
   };
 
-  const handleCardClick = () => navigate(`/product/${product._id}`);
+  const handleCardClick = () => navigate(`/product/${normalized._id}`);
 
   const compactSizeLimit = 3;
   const normalSizeLimit = 5;
@@ -61,7 +63,7 @@ export default function ProductCard({ product, compact = false }) {
           overflow: "hidden",
         }}
       >
-        {product.isFeatured && (
+        {normalized.isFeatured && (
           <Chip
             label="Featured"
             size="small"
@@ -97,8 +99,8 @@ export default function ProductCard({ product, compact = false }) {
           )}
           <CardMedia
             component="img"
-            image={product.image || `https://placehold.co/400x300/1A1A26/C9A84C?text=${encodeURIComponent(product.name)}`}
-            alt={product.name}
+            image={normalized.image || `https://placehold.co/400x300/1A1A26/C9A84C?text=${encodeURIComponent(normalized.name)}`}
+            alt={normalized.name}
             onLoad={() => setImgLoaded(true)}
             sx={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
@@ -116,7 +118,7 @@ export default function ProductCard({ product, compact = false }) {
             fontSize: compact ? "0.55rem" : "0.6rem",
             letterSpacing: "0.08em", textTransform: "uppercase",
           }}>
-            {product.category}
+            {normalized.category}
           </Typography>
 
           <Typography sx={{
@@ -127,7 +129,7 @@ export default function ProductCard({ product, compact = false }) {
             display: "-webkit-box", WebkitLineClamp: 2,
             WebkitBoxOrient: "vertical", overflow: "hidden",
           }}>
-            {product.name}
+            {normalized.name}
           </Typography>
 
           <Typography sx={{
@@ -135,12 +137,12 @@ export default function ProductCard({ product, compact = false }) {
             fontWeight: 700, color: "primary.main",
             fontFamily: '"Cormorant Garamond", serif',
           }}>
-            ${product.price?.toFixed(2)}
+            ${normalized.price?.toFixed(2)}
           </Typography>
 
           {hasSizes && (
             <Box sx={{ mt: compact ? 0.6 : 1, display: "flex", flexWrap: "wrap", gap: compact ? 0.3 : 0.4, alignItems: "center" }}>
-              {product.sizes.slice(0, compact ? compactSizeLimit : normalSizeLimit).map((s) => (
+              {normalized.sizes.slice(0, compact ? compactSizeLimit : normalSizeLimit).map((s) => (
                 <Box key={s} sx={{
                   px: compact ? 0.6 : 0.8,
                   py: compact ? 0.15 : 0.2,
@@ -155,9 +157,9 @@ export default function ProductCard({ product, compact = false }) {
                   {s}
                 </Box>
               ))}
-              {product.sizes.length > (compact ? compactSizeLimit : normalSizeLimit) && (
+              {normalized.sizes.length > (compact ? compactSizeLimit : normalSizeLimit) && (
                 <Typography sx={{ fontSize: compact ? "0.52rem" : "0.58rem", color: "text.disabled", alignSelf: "center" }}>
-                  +{product.sizes.length - (compact ? compactSizeLimit : normalSizeLimit)} more
+                  +{normalized.sizes.length - (compact ? compactSizeLimit : normalSizeLimit)} more
                 </Typography>
               )}
             </Box>
@@ -165,7 +167,7 @@ export default function ProductCard({ product, compact = false }) {
 
           {hasShoeSizes && (
             <Box sx={{ mt: compact ? 0.4 : 0.6, display: "flex", flexWrap: "wrap", gap: compact ? 0.3 : 0.4, alignItems: "center" }}>
-              {product.shoeSizes.slice(0, compact ? compactShoeSizeLimit : normalShoeSizeLimit).map((s) => (
+              {normalized.shoeSizes.slice(0, compact ? compactShoeSizeLimit : normalShoeSizeLimit).map((s) => (
                 <Box key={s} sx={{
                   px: compact ? 0.6 : 0.8,
                   py: compact ? 0.15 : 0.2,
@@ -180,9 +182,9 @@ export default function ProductCard({ product, compact = false }) {
                   {s}
                 </Box>
               ))}
-              {product.shoeSizes.length > (compact ? compactShoeSizeLimit : normalShoeSizeLimit) && (
+              {normalized.shoeSizes.length > (compact ? compactShoeSizeLimit : normalShoeSizeLimit) && (
                 <Typography sx={{ fontSize: compact ? "0.52rem" : "0.58rem", color: "text.disabled", alignSelf: "center" }}>
-                  +{product.shoeSizes.length - (compact ? compactShoeSizeLimit : normalShoeSizeLimit)} more
+                  +{normalized.shoeSizes.length - (compact ? compactShoeSizeLimit : normalShoeSizeLimit)} more
                 </Typography>
               )}
             </Box>
@@ -228,7 +230,7 @@ export default function ProductCard({ product, compact = false }) {
                 </Typography>
               )}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {product.sizes.map((s) => (
+                {normalized.sizes.map((s) => (
                   <Box
                     key={s}
                     onClick={() => setPendingSize(s)}
@@ -258,7 +260,7 @@ export default function ProductCard({ product, compact = false }) {
                 </Typography>
               )}
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {product.shoeSizes.map((s) => (
+                {normalized.shoeSizes.map((s) => (
                   <Box
                     key={s}
                     onClick={() => setPendingSize(s)}

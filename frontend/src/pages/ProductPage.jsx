@@ -10,6 +10,7 @@ import api from "../api/axios";
 import useCartStore from "../store/useCartStore";
 import useAuthStore from "../store/useAuthStore";
 import ProductCard from "../components/ProductCard";
+import normalizeProduct from "../utils/normalizeProduct";
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -33,8 +34,12 @@ export default function ProductPage() {
           api.get(`/products/${id}`),
           api.get("/products/recommendations"),
         ]);
-        setProduct(productRes.data);
-        const recs = (recRes.data || []).filter((p) => p._id !== id).slice(0, 4);
+        const productData = normalizeProduct(productRes.data);
+        setProduct(productData);
+        const recs = (recRes.data || [])
+          .map(normalizeProduct)
+          .filter((p) => p._id !== id)
+          .slice(0, 4);
         setRecommended(recs);
       } catch {
         setProduct(null);

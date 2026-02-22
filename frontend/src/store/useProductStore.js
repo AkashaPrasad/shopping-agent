@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import api from "../api/axios";
 import toast from "react-hot-toast";
+import normalizeProduct from "../utils/normalizeProduct";
 
 const useProductStore = create((set) => ({
   products: [],
@@ -12,7 +13,8 @@ const useProductStore = create((set) => ({
     set({ loading: true });
     try {
       const res = await api.get("/products");
-      set({ products: res.data.products ?? res.data, loading: false });
+      const products = (res.data.products ?? res.data)?.map(normalizeProduct) ?? [];
+      set({ products, loading: false });
     } catch {
       set({ loading: false });
       toast.error("Failed to load products");
@@ -23,7 +25,8 @@ const useProductStore = create((set) => ({
     set({ loading: true });
     try {
       const res = await api.get("/products/featured");
-      set({ featuredProducts: res.data, loading: false });
+      const products = (res.data || []).map(normalizeProduct);
+      set({ featuredProducts: products, loading: false });
     } catch {
       set({ loading: false });
     }
@@ -35,7 +38,7 @@ const useProductStore = create((set) => ({
     try {
       const res = await api.get(`/products/category/${category}`);
       // Handle both { products: [] } and [] shapes
-      const products = res.data.products ?? res.data;
+      const products = (res.data.products ?? res.data)?.map(normalizeProduct) ?? [];
       set({ products, loading: false });
     } catch {
       set({ loading: false });
@@ -50,7 +53,7 @@ const useProductStore = create((set) => ({
         api.get("/products/featured"),
         api.get("/products/recommendations"),
       ]);
-      const all = [...(featuredRes.data || []), ...(recRes.data || [])];
+      const all = [...(featuredRes.data || []), ...(recRes.data || [])].map(normalizeProduct);
       // Deduplicate by _id
       const unique = Array.from(new Map(all.map((p) => [p._id, p])).values());
       set({ products: unique, loading: false });
@@ -62,7 +65,7 @@ const useProductStore = create((set) => ({
   fetchRecommended: async () => {
     try {
       const res = await api.get("/products/recommendations");
-      return res.data;
+      return (res.data || []).map(normalizeProduct);
     } catch {
       return [];
     }
@@ -71,9 +74,10 @@ const useProductStore = create((set) => ({
   createProduct: async (data) => {
     try {
       const res = await api.post("/products", data);
-      set((s) => ({ products: [...s.products, res.data] }));
+      const normalized = normalizeProduct(res.data);
+      set((s) => ({ products: [...s.products, normalized] }));
       toast.success("Product created");
-      return res.data;
+      return normalized;
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to create product");
       throw err;
@@ -83,11 +87,12 @@ const useProductStore = create((set) => ({
   updateProduct: async (id, data) => {
     try {
       const res = await api.put(`/products/${id}`, data);
+      const normalized = normalizeProduct(res.data);
       set((s) => ({
-        products: s.products.map((p) => (p._id === id ? res.data : p)),
+        products: s.products.map((p) => (p._id === id ? normalized : p)),
       }));
       toast.success("Product updated");
-      return res.data;
+      return normalized;
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to update product");
       throw err;
@@ -107,8 +112,9 @@ const useProductStore = create((set) => ({
   toggleFeatured: async (id) => {
     try {
       const res = await api.patch(`/products/${id}`);
+      const normalized = normalizeProduct(res.data);
       set((s) => ({
-        products: s.products.map((p) => (p._id === id ? res.data : p)),
+        products: s.products.map((p) => (p._id === id ? normalized : p)),
       }));
     } catch {
       toast.error("Failed to update product");
