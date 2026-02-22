@@ -16,48 +16,56 @@ import analyticsRoutes from "./routes/analytics-route.js";
 
 const app = express();
 
+// Fix for __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Parse incoming JSON request bodies
-app.use(express.json({ limit: "10mb" })); // limit prevents oversized payloads
-
-// Parse cookies from incoming requests
+// Middleware
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 
-// Auth routes
+/* =========================
+   ✅ ROOT ROUTE (IMPORTANT)
+========================= */
+app.get("/", (req, res) => {
+  res.send("Backend is LIVE 🚀");
+});
+
+/* =========================
+   ✅ API ROUTES
+========================= */
 app.use("/api/auth", authenticationRouter);
-
-// Product routes
 app.use("/api/products", productRoutes);
-
-// Cart routes
 app.use("/api/cart", cartRoutes);
-
-// Coupon routes
 app.use("/api/coupons", couponRoutes);
-
-// Payment routes
 app.use("/api/payments", paymentRoutes);
-
-// Analytics routes
 app.use("/api/analytics", analyticsRoutes);
-
-// AI ChatBot
 app.use("/api/chat", chatRoutes);
 
-// Serve the frontend in production
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "/frontend/dist")));
+/* =========================
+   ✅ HEALTH CHECK (OPTIONAL)
+========================= */
+app.get("/health", (req, res) => {
+  res.json({ status: "OK" });
+});
 
-    // Catch-all route to serve the React app for any unmatched routes
-    app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
-    });
+/* =========================
+   ✅ SERVE FRONTEND (OPTIONAL)
+========================= */
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "frontend", "dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
 }
 
-// Start the server and connect to the database
-app.listen(ENV.PORT, () => {
-    console.log("Server is running on http://localhost:" + ENV.PORT);
-    connectDB();
+/* =========================
+   ✅ START SERVER
+========================= */
+const PORT = process.env.PORT || ENV.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  connectDB();
 });
