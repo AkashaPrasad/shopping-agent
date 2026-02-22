@@ -219,7 +219,7 @@ export default function HomePage() {
               </Grid>
             ))}
           </Grid>
-        ) : featuredProducts.length > 0 ? (
+        ) : Array.isArray(featuredProducts) && featuredProducts.length > 0 ? (
           <Grid container spacing={3}>
             {featuredProducts.slice(0, 8).map((product) => (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
@@ -233,7 +233,7 @@ export default function HomePage() {
           </Box>
         )}
 
-        {featuredProducts.length > 0 && (
+        {Array.isArray(featuredProducts) && featuredProducts.length > 0 && (
           <Box sx={{ textAlign: "center", mt: 6 }}>
             <Button
               component={Link}
@@ -293,7 +293,7 @@ export default function HomePage() {
               </Grid>
             ))}
           </Grid>
-        ) : recommended.length > 0 ? (
+        ) : Array.isArray(recommended) && recommended.length > 0 ? (
           <Grid container spacing={3}>
             {recommended.slice(0, 8).map((product) => (
               <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
@@ -307,7 +307,7 @@ export default function HomePage() {
           </Box>
         )}
 
-        {recommended.length > 0 && (
+        {Array.isArray(recommended) && recommended.length > 0 && (
           <Box sx={{ textAlign: "center", mt: 6 }}>
             <Button
               component={Link}

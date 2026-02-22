@@ -36,7 +36,7 @@ export default function ProductPage() {
         ]);
         const productData = normalizeProduct(productRes.data);
         setProduct(productData);
-        const recs = (recRes.data || [])
+        const recs = (Array.isArray(recRes.data) ? recRes.data : [])
           .map(normalizeProduct)
           .filter((p) => p._id !== id)
           .slice(0, 4);
@@ -265,7 +265,7 @@ export default function ProductPage() {
           </Grid>
         </Grid>
 
-        {recommended.length > 0 && (
+        {Array.isArray(recommended) && recommended.length > 0 && (
           <Box sx={{ mt: 10 }}>
             <Typography variant="subtitle1" sx={{ color: "primary.main", mb: 0.5 }}>You may also like</Typography>
             <Typography variant="h3" sx={{ fontSize: { xs: "1.8rem", md: "2.4rem" }, mb: 4, color: "text.primary" }}>
